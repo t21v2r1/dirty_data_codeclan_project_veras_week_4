@@ -1,0 +1,7 @@
+Package: dirty_data_codeclan_project_veras
+Type: Project
+Version: 0.0.1
+Imports:
+    knitr,
+    rmarkdown
+Encoding: UTF-8
