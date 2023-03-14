@@ -1,0 +1,55 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+#read data
+decathlon <- read_rds('raw_data/decathlon.rds')
+library(tibble)
+#convert row names to a column named "Name"
+decathlon_2 <- tibble::rownames_to_column(decathlon, "Competitor")
+#rename columns and clean data
+library(janitor)
+decathlon_3 <- decathlon_2 %>% 
+  clean_names() 
+##lower case to all names
+
+
+# formats check
+str(decathlon_3)
+#1. Who had the longest long jump seen in the data?
+decathlon_3 %>% 
+  slice_max(long_jump, n = 1)
+#2. What was the average 100m time in each competition?
+decathlon_3 %>% 
+group_by(competition) %>% 
+summarise(avg_100_m = mean(x100m))
+#3. Who had the highest total points across both competitions?
+decathlon_3 %>% 
+  slice_max(points, n=1)
+#4. What was the shot-put scores for the top three competitors in each competition?
+decathlon_3 %>% 
+ group_by(competition) %>%
+ slice_max(shot_put, n=3)
+#5. What was the average points for competitors who ran the 400m in less than 50 seconds vs. those than ran 400m in more than 50 seconds?
+#  decathlon_3 %>% 
+#filter(x400m<50) %>% 
+#    summarise(mean(points)) %>% 
+#    pull()
+#    decathlon_3 %>% 
+#filter(x400m>=50) %>% 
+#    summarise(mean(points)) %>% 
+#      pull()
+
+decathlon_3 %>% 
+  mutate(average_points_400m_under_50_sec = filter(x400m<50))
+
+decathlon_3 %>% 
+filter(x400m<50) %>% 
+summarise(mean(points))%>% 
+  add_column(add_column = "constant_value") 
+```
+#Total Score by competitor by competition
+
