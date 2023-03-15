@@ -1,0 +1,41 @@
+---
+title: "Analysis"
+output: html_document
+date: "2023-03-15"
+---
+
+```{r}
+library(tidyverse)
+candy_analysis <- read_csv("clean_data/clean_candy.csv")
+```
+##1.  What is the total number of candy ratings given across the three years. (Number of candy ratings, not the number of raters. Don’t count missing values)
+```{r}
+# What is the total number of candy ratings given across the three years. (Number of candy ratings, not the number of raters. Don’t count missing values)
+candy_analysis_ratings <- candy_analysis %>%
+    select(-c("year","age","are_you_trick_or_treating","gender",
+              "country"))
+   sum(!is.na(candy_analysis_ratings))
+```
+```{r}
+
+##2. What was the average age of people who are going out trick or treating?
+##3. What was the average age of people who are not going trick or treating?
+av_age_trick_or_treating <- candy_analysis %>%
+group_by(are_you_trick_or_treating) %>%
+    filter(age <= 100) %>%
+         summarise(average_age = mean(age,na.rm= TRUE))
+av_age_trick_or_treating
+    
+names(candy_analysis)
+```
+##4 For each of joy, despair and meh, which candy bar received the most of these ratings?
+```{r}
+
+```
+##How many people rated Starburst as despair?
+```{r}
+candy_analysis %>% 
+
+```
+
+

@@ -15,20 +15,26 @@ candy_2017 <- read_excel("raw_data/boing-boing-candy-2017.xlsx")
 
 #get names of data
 
+# deleted columns based on strings
+candy_2015_del_col <- candy_2015 %>%
+    select(-c("Please estimate the degrees of separation you have from the following folks [Beyoncé Knowles]",
+   "Please estimate the degrees of separation you have from the following folks [Donald Trump]",
+ "Please estimate the degrees of separation you have from the following folks [Hillary Clinton]"))
+
 ##deleting colums we do not need 
 
-candy_2015_del_range <- select(candy_2015, -c(116:121),
+candy_2015_del_range <- select(candy_2015_del_col, -c(116:121),
                                -c(100:113),
                                -c(93:95),
-                               -c(88, 57, 45, 41, 33,28 ,26, 23, 18,16 ,10))
+                               -c(88, 57, 45, 41, 33, 28, 26, 23, 18, 16, 10))
 
 ##count columns numbers so we can compare
-ncol(candy_2015) 
+ncol(candy_2015_del_col) 
 ncol(candy_2015_del_range)
 
 candy_2016_del_range <- select(candy_2016, 
                                -c(109:123), 
-                               -c(104, 105, 101, 102, 79, 49, 43, 46, 31, 32, 27, 21, 22, 12, 15,                                   13))
+                               -c(104, 105, 101, 102, 79, 49, 43, 46, 31, 32, 27, 21, 22, 12, 15, 13))
 
 ##count columns numbers so we can compare
 ncol(candy_2016) 
@@ -239,20 +245,77 @@ candy_2016_gender <- candy_2016_year %>%
 candy_2017_gender <- candy_2017_year %>% 
   rename("gender" = "q2_gender")
 ```
-```{r}
-names(candy_2015_year)
-names(candy_2016_gender)
-names(candy_2017_gender)
-```
 
-```{r}
-common_rows2 <- inner_join(candy_2015_year, candy_2016_gender, candy_2017_gender, by="age")
-```
 ```{r}
 candy_2015_test <- names(candy_2015_year)
 candy_2016_test <- names(candy_2016_gender)
-candy_2017_test <- names(candy_2017_gender)
-
-candy_anti_join <- anti_join(candy_2015_test, candy_2016_test, by = "age")
+intersect(candy_2015_test, candy_2016_test)
+setdiff(candy_2015_test, candy_2016_test)
+view(candy_2016_test)
 ```
+
+```{r}
+#unifying candy names in 2015 and 2016
+candy_2015_year
+candy_2016_gender
+rename_candy_2016 <- candy_2016_gender %>%
+    rename ("bonkers"= "bonkers_the_candy",
+            "box_o_raisins" = "boxo_raisins",
+            "dark_chocolate_hershey" = "hersheys_dark_chocolate",
+            "sweetums" = "sweetums_a_friend_to_diabetes"
+            )
+rename_candy_2016
+```
+```{r}
+candy_2017_test <- names(candy_2017_gender)
+candy_2016_renamed_test <- names(rename_candy_2016)
+setdiff(candy_2017_test, candy_2016_renamed_test)
+view(candy_2016_renamed_test)
+```
+```{r}
+rename_candy_2017 <- candy_2017_gender %>%
+    rename ("bonkers"= "bonkers_the_candy",
+            "box_o_raisins" = "boxo_raisins",
+            "dark_chocolate_hershey" = "hersheys_dark_chocolate",
+            "sweetums" = "sweetums_a_friend_to_diabetes"
+                   )
+view(rename_candy_2017)
+```
+
+```{r}
+#combining all 3 datasets
+combine_candy <- bind_rows(candy_2015_year, rename_candy_2016, rename_candy_2017)
+view(combine_candy)
+
+#comparing number of columns
+ncol(candy_2015_year)
+ncol(rename_candy_2016)
+ncol(rename_candy_2017)
+ncol(combine_candy)
+```
+
+```{r}
+
+#deleting columns we don't need from combine_candy
+clean_candy <- select(combine_candy, -c (1,4,24,29,33,49,81,82,85,86,87,88,
+                                         91,93,95,74,112,113,114,116,117,120,
+                                         121, 8, 115))
+```
+```{r}
+# Unifying the column are you trick or treating.
+clean_candy_final <- clean_candy %>%
+    unite("are_you_trick_or_treating", c("are_you_going_actually_going_trick_or_treating_yourself",
+           "q1_going_out")) %>%
+    mutate(are_you_trick_or_treating = str_remove_all(are_you_trick_or_treating, "_NA")) %>% 
+  mutate(are_you_trick_or_treating = str_remove_all(are_you_trick_or_treating, "NA_"))
+names(combine_candy)
+clean_candy_final
+names(clean_candy_final)
+ncol(clean_candy_final)
+write_csv(clean_candy_final, "clean_data/clean_candy.csv")
+```
+
+
+
+
 
