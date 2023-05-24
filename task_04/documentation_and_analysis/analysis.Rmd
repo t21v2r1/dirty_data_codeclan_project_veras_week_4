@@ -71,7 +71,8 @@ names(candy_analysis)
 ```{r}
 candy_totals <- candy_analysis_ratings %>%
       gather("candy_bar","ratings") %>%
-        group_by(candy_bar, ratings) %>% count(ratings, name = "total") %>%
+        group_by(candy_bar, ratings) %>% 
+  count(ratings, name = "total") %>%
        arrange(desc(`total`))
 head(filter(candy_totals, ratings == "DESPAIR")) 
 head(filter(candy_totals, ratings == "JOY"))

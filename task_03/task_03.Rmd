@@ -1,17 +1,102 @@
 ---
-title: "task_03"
-output: html_document
-date: "2023-03-15"
+title: "R Notebook"
+output: html_notebook
 ---
 
 ```{r}
 library(tidyverse)
-library("readxl")
-
+library(readxl)
+library(janitor)
+library(dplyr)
 excel_sheets('raw_data/seabirds.xls')
 ship_data_id <- read_excel('raw_data/seabirds.xls', sheet = "Ship data by record ID")
 bird_data_id <- read_excel('raw_data/seabirds.xls', sheet = "Bird data by record ID")
 ship_data_codes <- read_excel('raw_data/seabirds.xls', sheet = "Ship data codes")
 bird_data_codes <- read_excel('raw_data/seabirds.xls', sheet = "Bird data codes")
 ```
+
+
+```{r}
+birds_and_ships <- left_join(bird_data_id, ship_data_id, by="RECORD ID")
+glimpse(birds_and_ships)
+```
+```{r}
+birds_and_ships_clean <- select(birds_and_ships, -c(1, 6:9, 11:27, 32:52))
+birds_and_ships_clean_2 <- janitor::clean_names(birds_and_ships_clean)
+```
+
+```{r}
+birds_and_ships_clean_3 <- birds_and_ships_clean_2 %>% 
+separate(species_abbreviation, c('species_name', 'age'))
+
+```
+```{r}
+birds_sightings <- birds_and_ships_clean_3 %>% 
+  group_by(species_name) %>% 
+  count(species_name, name="total") %>% 
+ arrange(desc(total)) 
+```
+```{r}
+birds_and_ships_clean_3 %>% 
+  filter(species_name == "DIOANTEXU")
+```
+```{r}
+birds_and_ships_clean_3 %>% 
+  group_by(species_name) %>% 
+ summarise(sum = sum(!is.na(count))) %>% 
+     arrange(desc(sum))
+birds_and_ships_clean_3 %>% 
+  filter(species_name == "DIOANTEXU")  
+```
+```{r}
+birds_and_ships_clean_3 %>% 
+  filter(lat>-30) %>% 
+  group_by(species_name) %>% 
+ summarise(sum = sum(!is.na(count))) %>% 
+     arrange(desc(sum))
+birds_and_ships_clean_3 %>% 
+  filter(species_name == "PUFPAC")
+```
+```{r}
+bird_1 <- birds_and_ships_clean_3 %>% 
+  filter(lat>-30) %>% 
+  group_by(species_name) %>% 
+ summarise(sum = sum(!is.na(count))) %>% 
+slice_max(sum, n=1) %>% 
+pull(species_name)
+```
+```{r}
+birds_and_ships_clean_3 %>% 
+  filter(species_name == bird_1)
+```
+
+```{r}
+bird_2 <- birds_and_ships_clean_3 %>% 
+  group_by(species_name) %>% 
+ summarise(sum = sum(!is.na(count))) %>% 
+   slice_max(sum, n=1) %>% 
+pull(species_name)
+
+birds_and_ships_clean_3 %>% 
+  filter(species_name == bird_2)  
+```
+```{r}
+how_many_sigtings <- birds_and_ships_clean_3 %>% 
+group_by(species_name) %>% 
+  summarise(how_many_sightings = sum(!is.na(species_name)))
+
+how_many_items <- birds_and_ships_clean_3 %>% 
+  group_by(species_name) %>% 
+  summarise(how_many_items = sum(!is.na(count)))
+
+how_many_solitary <- left_join(how_many_sigtings, how_many_items, by="species_name")
+
+how_many_solitary_birds_out_there <- how_many_solitary %>% 
+ mutate(how_many_sigtings = ifelse(how_many_sigtings == how_many_items, "yes", "no"))
+
+```
+
+
+
+
 
